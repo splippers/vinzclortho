@@ -4,11 +4,51 @@
 
 The Keymaster. Central credential manager and API client hub for the Splipperverse.
 
-Run the setup wizard to register your accounts and generate your local `.env`:
+Run the setup wizard to register your accounts and generate your local `.env` files:
 
 ```bash
 python3 setup.py
 ```
+
+---
+
+## Shoulders / store.splippers.com (`stripe_shoulders.py`)
+
+UK statutory register management SaaS. Manages Stripe credentials and pre-wires the live product/price.
+
+### What the wizard does for you
+- Writes `../splippers.com/.env` with all required vars
+- Generates a `TOKEN_ENCRYPTION_KEY` (Fernet — save it, it encrypts OAuth tokens at rest)
+- Pre-fills `STRIPE_PRICE_ID=price_1TZpG40hSs6KrAknRm8sqJEH` (£19/month, live, created 2026-05-22)
+
+### What you need to provide
+
+| What | Where to get it |
+|------|-----------------|
+| `STRIPE_SECRET_KEY` | Stripe Dashboard → Developers → API keys → Secret key |
+| `STRIPE_WEBHOOK_SECRET` | After registering webhook URL in Stripe (see below) |
+| Cloud storage OAuth app credentials | Google Console / Dropbox App Console / Azure App Registration |
+
+### Registering the Stripe webhook (after deploy)
+
+1. Go to Stripe Dashboard → Developers → Webhooks → Add endpoint
+2. URL: `https://store.splippers.com/billing/webhook`
+3. Events: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
+4. Copy the signing secret (`whsec_...`) and re-run `python3 setup.py` or add to `.env` manually
+
+### Environment variables
+
+| Variable | Purpose |
+|----------|---------|
+| `STRIPE_SECRET_KEY` | Stripe live secret key |
+| `STRIPE_WEBHOOK_SECRET` | Webhook signing secret |
+| `STRIPE_PRICE_ID` | Pre-filled — £19/month recurring |
+| `TOKEN_ENCRYPTION_KEY` | Fernet key for encrypting OAuth tokens at rest |
+| `APP_BASE_URL` | Public URL of the deployed service |
+| `OAUTH_REDIRECT_URI` | OAuth callback (auto-set from APP_BASE_URL) |
+| `GOOGLE_CLIENT_ID/SECRET` | Google Drive OAuth app |
+| `DROPBOX_APP_KEY/SECRET` | Dropbox OAuth app |
+| `ONEDRIVE_CLIENT_ID/SECRET` | Microsoft OneDrive OAuth app |
 
 ---
 
